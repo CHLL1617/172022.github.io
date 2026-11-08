@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小画家 · 个人画集</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0e0e12;--card:#1c1c26;--text:#e8e6e3;--dim:#8a8890;--accent:#7c6aef;--radius:12px;--tr:.3s cubic-bezier(.4,0,.2,1)}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+.hero{min-height:65vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:2rem}
+.hero-title{font-size:clamp(2.5rem,8vw,5rem);font-weight:900;background:linear-gradient(135deg,var(--accent),#ef6a7c,#6aefb8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3em}
+.hero-sub{color:var(--dim);font-size:1rem;max-width:520px}
+.hero-count{margin-top:1rem;font-size:.85rem;color:var(--dim);border:1px dashed rgba(255,255,255,.12);padding:.35rem 1rem;border-radius:50px}
+.nav{position:sticky;top:0;z-index:100;background:rgba(14,14,18,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.05);padding:.7rem .8rem;display:flex;justify-content:center;flex-wrap:wrap;gap:.4rem}
+.nav-btn{background:transparent;color:var(--dim);border:1px solid rgba(255,255,255,.08);padding:.4rem .9rem;border-radius:50px;font-size:.85rem;cursor:pointer;transition:var(--tr);font-family:inherit}
+.nav-btn:hover,.nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.section{max-width:1200px;margin:0 auto;padding:2.5rem 1.5rem}
+.section-head{display:flex;align-items:baseline;gap:.6rem;margin-bottom:1.4rem;border-left:4px solid var(--accent);padding-left:10px}
+.section-head h2{font-size:1.3rem;font-weight:700}
+.section-head span{font-size:.78rem;color:var(--dim)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.2rem}
+.card{background:var(--card);border-radius:var(--radius);overflow:hidden;transition:var(--tr);cursor:pointer;border:1px solid rgba(255,255,255,.04);position:relative}
+.card:hover{transform:translateY(-5px);box-shadow:0 12px 28px rgba(0,0,0,.5);border-color:rgba(124,106,239,.25)}
+.wrap{width:100%;aspect-ratio:3/4;overflow:hidden;position:relative;background:#141419}
+.wrap.land{aspect-ratio:4/3}
+.card img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.card:hover img{transform:scale(1.05)}
+.overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(14,14,18,.92),transparent 55%);opacity:0;transition:var(--tr);display:flex;align-items:flex-end;padding:1rem}
+.card:hover .overlay{opacity:1}
+.overlay h3{font-size:.95rem}
+.overlay p{font-size:.73rem;color:var(--dim)}
+.tag{position:absolute;top:10px;left:10px;background:rgba(124,106,239,.85);color:#fff;font-size:.68rem;padding:.15rem .5rem;border-radius:50px}
+.err{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.4rem;color:var(--dim);font-size:.78rem;padding:1rem;text-align:center;background:#141419}
+.err b{color:#c9c6d0;font-size:.85rem}
+.empty{border:2px dashed rgba(255,255,255,.08);border-radius:var(--radius);aspect-ratio:3/4;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.5rem;color:var(--dim);transition:var(--tr)}
+.empty:hover{border-color:var(--accent);background:rgba(124,106,239,.05)}
+.empty i{font-size:2rem;font-style:normal;opacity:.4}
+.empty span{font-size:.82rem;opacity:.5}
+.lightbox{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.96);display:none;justify-content:center;align-items:center}
+.lightbox.on{display:flex}
+.lightbox img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:8px}
+.lb-close{position:absolute;top:18px;right:26px;font-size:1.4rem;color:#fff;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.12)}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);font-size:1.8rem;color:#fff;cursor:pointer;width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.1);user-select:none}
+.lb-prev{left:18px}.lb-next{right:18px}
+.lb-cap{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);color:#fff;font-size:.85rem;background:rgba(0,0,0,.6);padding:.4rem 1.2rem;border-radius:50px;text-align:center;max-width:90vw}
+.hidden{display:none!important}
+footer{text-align:center;padding:2.5rem 1rem;border-top:1px solid rgba(255,255,255,.05);color:var(--dim);font-size:.8rem}
+@media(max-width:520px){.grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.8rem}.section{padding:2rem 1rem}}
+@media(max-width:360px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1 class="hero-title">小画家</h1>
+  <p class="hero-sub">从素描基础到情绪表达，记录每一笔的成长轨迹。</p>
+  <div class="hero-count" id="heroCount"></div>
+</header>
+
+<nav class="nav" id="nav"></nav>
+<main id="main"></main>
+
+<div class="lightbox" id="lightbox">
+  <div class="lb-close" onclick="closeLB()">✕</div>
+  <div class="lb-nav lb-prev" onclick="stepLB(-1)">‹</div>
+  <div class="lb-nav lb-next" onclick="stepLB(1)">›</div>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<footer>© <span id="yr"></span> 小画家 · 个人画集 · 持续更新中</footer>
+
+<script>
+/* ===== 分类定义 ===== */
+const CATS=[
+  {id:'base',     name:'基础练习',  icon:'📐',desc:'素描结构 · 明暗 · 透视'},
+  {id:'plant',    name:'植物花卉',  icon:'🌿',desc:'彩铅 · 写生与色彩'},
+  {id:'original', name:'原创线稿',  icon:'🐉',desc:'线稿 · 漫画 · 设计'},
+  {id:'char',     name:'人物角色',  icon:'🎭',desc:'动漫 · 水墨 · 表情'},
+  {id:'emotion',  name:'情绪抽象',  icon:'🖤',desc:'概念创作 · 情感表达'}
+];
+
+/* ===== 作品列表（去重后19张，直接用你文件夹里的文件名） =====
+   t=标题  d=说明  img=文件名（和index.html同目录）  cat=分类  r='land'表示横图 */
+const works=[
+  // 📐 基础练习
+  {t:'长方体素描',    d:'铅笔 · 透视与明暗',     img:'01_长方体素描.jpg',     cat:'base',    r:'land'},
+  {t:'圆锥体素描',    d:'铅笔 · 曲面明暗过渡',   img:'02_圆锥体素描.jpg',     cat:'base',    r:'land'},
+
+  // 🌿 植物花卉
+  {t:'莲花线描',      d:'铅笔 · 花瓣叠压',       img:'03_莲花线描.jpg',       cat:'plant'},
+  {t:'彩色仙人掌',    d:'彩铅 · 大胆配色',       img:'04_彩色仙人掌.jpg',     cat:'plant'},
+  {t:'小苍兰',        d:'彩铅 · 花瓣层次',       img:'05_小苍兰.jpg',         cat:'plant'},
+  {t:'花朵与果实',    d:'彩铅 · 枝条构图',       img:'06_花朵与果实.jpg',     cat:'plant'},
+  {t:'多肉盆栽',      d:'彩铅 · 叶片叠色',       img:'07_多肉盆栽.jpg',       cat:'plant'},
+  {t:'荷花与荷叶',    d:'彩铅 · 大场景构图',     img:'08_荷花与荷叶.jpg',     cat:'plant'},
+  {t:'蓝色山茶',      d:'彩铅 · 枝叶与花组合',   img:'09_蓝色山茶.jpg',       cat:'plant'},
+
+  // 🐉 原创线稿
+  {t:'中国龙',        d:'铅笔线稿 · 鳞片结构',   img:'10_中国龙.jpg',         cat:'original'},
+  {t:'「就让我们尽情享受」',d:'墨水 · 漫画分镜',    img:'11_漫画分镜.jpg',       cat:'original'},
+  {t:'纸币上的飞鸟',  d:'圆珠笔 · 即兴创作',     img:'12_蓝色飞鸟.jpg',       cat:'original',r:'land'},
+
+  // 🎭 人物角色
+  {t:'「解」',        d:'铅笔 · 排线压暗与眼神', img:'13_兜帽人物解.jpg',     cat:'char'},
+  {t:'宿傩 vs 虎杖',  d:'铅笔 · 表情对比',       img:'14_宿傩虎杖.jpg',       cat:'char'},
+  {t:'口罩兜帽·敬礼', d:'水墨渲染 · 黑白灰层次', img:'15_口罩兜帽敬礼.jpg',   cat:'char'},
+
+  // 🖤 情绪抽象
+  {t:'恐惧·红色小人', d:'墨水+彩铅 · 情绪主题',  img:'16_乱线红色小人.jpg',   cat:'emotion'},
+  {t:'思维风暴',      d:'墨水 · 情绪视觉化',     img:'17_抱头黑色龙卷.jpg',   cat:'emotion'},
+  {t:'人即植物',      d:'墨水 · 原创意象',       img:'18_黑白线条人物.jpg',   cat:'emotion'},
+  {t:'色彩实验',      d:'彩铅 · 配色直觉练习',   img:'19_抽象色块.jpg',       cat:'emotion'}
+];
+
+/* 每个分类末尾留2个空位 */
+const EMPTY_SLOTS=2;
+
+/* ===== 渲染 ===== */
+$('#nav').innerHTML=
+  `<button class="nav-btn active" data-f="all">全部</button>`+
+  CATS.map(c=>`<button class="nav-btn" data-f="${c.id}">${c.icon} ${c.name}</button>`).join('');
+
+$('#main').innerHTML=CATS.map(c=>{
+  const items=works.filter(w=>w.cat===c.id);
+  const cards=items.map(w=>{
+    const i=works.indexOf(w);
+    const cls=w.r==='land'?'land':'';
+    return `<article class="card" data-cat="${c.id}" onclick="openLB(${i})">
+      <div class="wrap ${cls}">
+        <img src="./${w.img}" alt="${w.t}" loading="lazy" onerror="imgErr(this,'${w.img}')">
+        <span class="tag">${c.name}</span>
+        <div class="overlay"><div><h3>${w.t}</h3><p>${w.d}</p></div></div>
+      </div>
+    </article>`;
+  }).join('');
+  const blanks=Array.from({length:EMPTY_SLOTS},()=>
+    `<div class="empty" data-cat="${c.id}"><i>＋</i><span>预留位置 · 未来添加</span></div>`).join('');
+  return `<section class="section" data-sec="${c.id}">
+    <div class="section-head"><h2>${c.icon} ${c.name}</h2><span>${c.desc} · ${items.length} 幅</span></div>
+    <div class="grid">${cards}${blanks}</div>
+  </section>`;
+}).join('');
+
+$('#heroCount').textContent=`收录 ${works.length} 幅作品 · ${CATS.length} 个分类`;
+$('#yr').textContent=new Date().getFullYear();
+
+window.imgErr=(el,name)=>{
+  el.onerror=null;
+  el.parentElement.insertAdjacentHTML('afterbegin',
+    `<div class="err"><b>找不到图片</b><span>请把文件命名为<br>${name}</span></div>`);
+};
+
+/* ===== 灯箱 ===== */
+let cur=0,list=works.map((_,i)=>i);
+window.openLB=i=>{cur=i;showLB();$('#lightbox').classList.add('on');document.body.style.overflow='hidden';};
+window.closeLB=()=>{$('#lightbox').classList.remove('on');document.body.style.overflow='';};
+window.stepLB=d=>{const p=list.indexOf(cur);cur=list[(p+d+list.length)%list.length];showLB();};
+function showLB(){const w=works[cur];$('#lbImg').src='./'+w.img;$('#lbCap').textContent=`${w.t} — ${w.d}（${cur+1}/${works.length}）`;}
+document.addEventListener('keydown',e=>{
+  if(!$('#lightbox').classList.contains('on'))return;
+  if(e.key==='Escape')closeLB();
+  if(e.key==='ArrowLeft')stepLB(-1);
+  if(e.key==='ArrowRight')stepLB(1);
+});
+$('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLB();});
+
+/* ===== 筛选 ===== */
+$('#nav').addEventListener('click',e=>{
+  const b=e.target.closest('.nav-btn');if(!b)return;
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x===b));
+  const f=b.dataset.f;
+  document.querySelectorAll('.card,.empty').forEach(el=>el.classList.toggle('hidden',f!=='all'&&el.dataset.cat!==f));
+  document.querySelectorAll('.section').forEach(s=>s.classList.toggle('hidden',f!=='all'&&s.dataset.sec!==f));
+  list=works.map((w,i)=>f==='all'||w.cat===f?i:-1).filter(i=>i>=0);
+});
+
+function $(s){return document.querySelector(s);}
+</script>
+</body>
+</html>
